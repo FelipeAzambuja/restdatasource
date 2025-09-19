@@ -1,0 +1,22 @@
+{
+  "name": "restdatasource",
+  "version": "1.0.0",
+  "description": "A simple and flexible datasource library for Javascript with REST support. Features pagination, search, local buffering and navigation (next/prev), inspired by Delphi Datasource simplicity.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FelipeAzambuja/restdatasource.git"
+  },
+  "author": "Felipe Azambuja || ChatGPT",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FelipeAzambuja/restdatasource/issues"
+  },
+  "homepage": "https://github.com/FelipeAzambuja/restdatasource#readme",
+  "dependencies": {
+    "axios": "^1.12.2"
+  }
+}
