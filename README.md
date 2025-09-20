@@ -20,14 +20,14 @@ Perfect when you need to handle pagination, keep a local cache of records, and c
 ## 🚀 Installation
 
 ```bash
-npm install rest-data-source
+npm install restdatasource
 ```
 
 ## 📦 Basic Usage
 
 ```ts
 import axios from "axios";
-import { RestDataSource } from "rest-data-source";
+import { RestDataSource } from "restdatasource";
 
 const api = new RestDataSource("http://localhost:3000/users", {
   axios: axios.create({ baseURL: "http://localhost:3000" }),
@@ -36,11 +36,11 @@ const api = new RestDataSource("http://localhost:3000/users", {
 });
 
 async function main() {
-  await api.load();                // Carrega primeira página
-  console.log(api.current());      // Mostra o primeiro registro
-  console.log(await api.next());   // Avança
-  console.log(await api.prev());   // Volta
-  console.log(await api.goto(120)) // Vai até índice global 120
+  await api.load();                // First Load 
+  console.log(api.current());      // Show current row
+  console.log(await api.next());   // Next
+  console.log(await api.prev());   // Previous
+  console.log(await api.goto(120)) // Goto to global index 128
 }
 main();
 ```
