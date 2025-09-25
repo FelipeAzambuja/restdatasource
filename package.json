@@ -1,6 +1,6 @@
 {
   "name": "restdatasource",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "A simple and flexible datasource library for Javascript with REST support. Features pagination, search, local buffering and navigation (next/prev), inspired by Delphi Datasource simplicity.",
   "main": "index.js",
   "scripts": {

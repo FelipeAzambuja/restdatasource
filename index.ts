@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios"
 
-class RestDataSource<T = any> {
+export class RestDataSource<T = any> {
 
     axios: AxiosInstance;
     endpoint: string;
@@ -60,27 +60,16 @@ class RestDataSource<T = any> {
 
 
     async goto(index: number): Promise<T | null> {
-        if (index < 0) {
-            this.index = 0;
-            return this.current();
-        }
-        if (index >= this.count) {
-            this.index = this.count - 1;
-            return this.current();
-        }
         const page = Math.floor(index / this.bufferSize) + 1;
-        if (page !== this.page) {
-            this.page = page;
-            await this.load();
-        }
-        // ajusta index relativo ao buffer atual
+        this.page = page;
+        await this.load();
         this.index = index % this.bufferSize;
         return this.current();
     }
 
     // ========= Carregamento de página (buffer) =========
 
-    async load(): Promise<{ success: boolean; error?: string; data?: T[] }> {
+    async load(): Promise<{ success: boolean; error?: string; data?: T[]; }> {
         try {
             this.loading = true;
             const query = { search: null as any | null, page: this.page, limit: this.bufferSize };
@@ -93,9 +82,9 @@ class RestDataSource<T = any> {
             this.records = data.rows;
             this.count = data.count;
             this.count_pages = Math.ceil(this.count / this.bufferSize);
-            this.index = 0;
+            // this.index = 0;
             this.hasMore = this.count > (this.page * this.bufferSize);
-            this.first();
+            // this.first();
             return { success: true, data: this.records };
         } catch (err) {
             return { success: false, error: err.message };
@@ -133,9 +122,9 @@ class RestDataSource<T = any> {
         return this.current(); // não tem mais dados
     }
 
-    async prev() : Promise<T | null> {
+    async prev(): Promise<T | null> {
 
-        this.last_move = "next";
+        this.last_move = "prev";
         if (this.index > 0) {
             this.index--;
             return this.current();
@@ -155,23 +144,23 @@ class RestDataSource<T = any> {
         return this.goto(0);
     }
 
-    async last() : Promise<T | null> {
-        return this.goto(this.count-1);
+    async last(): Promise<T | null> {
+        return this.goto(this.count - 1);
     }
 
-    async search(params = {}): Promise<{ success: boolean; error?: string; data?: T[] }> {
+    async search(params = {}): Promise<{ success: boolean; error?: string; data?: T[]; }> {
         this.data_search = params;
         this.page = 1;
         return this.load();
     }
 
 
-    async findBy(field: string, value: string | number | boolean | null): Promise<{ success: boolean; error?: string; data?: T[] }> {
+    async findBy(field: string, value: string | number | boolean | null): Promise<{ success: boolean; error?: string; data?: T[]; }> {
         return this.search({ [field]: value });
     }
 
     // ========= CRUD =========
-    async insert(payload: any): Promise<{ success: boolean; error?: string; data?: T }> {
+    async insert(payload: any): Promise<{ success: boolean; error?: string; data?: T; }> {
         try {
             if (!payload || typeof payload !== "object") {
                 throw new Error("Payload inválido para insert");
@@ -188,7 +177,7 @@ class RestDataSource<T = any> {
         }
     }
 
-    async update(id :string|number, payload:any): Promise<{ success: boolean; error?: string; data?: T }> {
+    async update(id: string | number, payload: any): Promise<{ success: boolean; error?: string; data?: T; }> {
         try {
             if (!id) throw new Error("ID é obrigatório para update");
             this.loading = true;
@@ -203,7 +192,7 @@ class RestDataSource<T = any> {
         }
     }
 
-    async delete(id: string | number): Promise<{ success: boolean; error?: string }> {
+    async delete(id: string | number): Promise<{ success: boolean; error?: string; }> {
         try {
             if (!id) throw new Error("ID é obrigatório para delete");
             this.loading = true;
