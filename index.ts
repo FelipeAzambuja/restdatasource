@@ -117,6 +117,7 @@ export class RestDataSource<T = any> {
         if (this.hasMore) {
             this.page++;
             const res = await this.load();
+            this.index = 0;
             return res.success ? this.current() : null;
         }
         return this.current(); // não tem mais dados
