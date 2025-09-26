@@ -1,8 +1,8 @@
 {
   "name": "restdatasource",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A simple and flexible datasource library for Javascript with REST support. Features pagination, search, local buffering and navigation (next/prev), inspired by Delphi Datasource simplicity.",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
