@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios"
 
-export class RestDataSource<T = any> {
+class RestDataSource<T = any> {
 
     axios: AxiosInstance;
     endpoint: string;
@@ -58,26 +58,30 @@ export class RestDataSource<T = any> {
         this.loading = false;
     }
 
+    no_touch_data = null as T | null | undefined | any;
 
     async goto(index: number): Promise<T | null> {
         const page = Math.floor(index / this.bufferSize) + 1;
         this.page = page;
         await this.load();
         this.index = index % this.bufferSize;
-        return this.current();
+        this.no_touch_data = JSON.stringify(this.current());
+        return this.no_touch_data;
+    }
+
+    is_change(data: any) {
+        return this.no_touch_data != JSON.stringify(data);
     }
 
     // ========= Carregamento de página (buffer) =========
 
     async load(): Promise<{ success: boolean; error?: string; data?: T[]; }> {
         try {
-            this.loading = true;
             const query = { search: null as any | null, page: this.page, limit: this.bufferSize };
             if (this.data_search) {
                 query.search = this.data_search;
             }
             const { data } = await this.axios.get(this.endpoint, { params: query });
-            this.loading = false;
 
             this.records = data.rows;
             this.count = data.count;
@@ -110,7 +114,9 @@ export class RestDataSource<T = any> {
         this.last_move = "next";
         if (this.index < this.records.length - 1) {
             this.index++;
-            return this.current();
+            var ret = this.current();
+            this.no_touch_data = JSON.stringify(ret);
+            return ret;
         }
 
         // chegou no final do buffer → carregar próxima página
@@ -118,7 +124,9 @@ export class RestDataSource<T = any> {
             this.page++;
             const res = await this.load();
             this.index = 0;
-            return res.success ? this.current() : null;
+            var ret = this.current();
+            this.no_touch_data = JSON.stringify(ret);
+            return res.success ? ret : null;
         }
         return this.current(); // não tem mais dados
     }
@@ -128,7 +136,9 @@ export class RestDataSource<T = any> {
         this.last_move = "prev";
         if (this.index > 0) {
             this.index--;
-            return this.current();
+            var ret = this.current();
+            this.no_touch_data = JSON.stringify(ret);
+            return ret;
         }
 
         // chegou no início do buffer → tentar carregar página anterior
@@ -136,7 +146,9 @@ export class RestDataSource<T = any> {
             this.page--;
             const res = await this.load();
             this.index = this.records.length - 1; // ir para o último da página anterior
-            return res.success ? this.current() : null;
+            var ret = this.current();
+            this.no_touch_data = JSON.stringify(ret);
+            return res.success ? ret : null;
         }
         return this.current();
     }
@@ -168,26 +180,25 @@ export class RestDataSource<T = any> {
             }
             this.loading = true;
             const { data } = await this.axios.post(this.endpoint, payload);
+            await this.load();
             this.loading = false;
-            const created = data || {};
-            this.records.push(created);
-            this.index = this.records.length - 1;
             return { success: true, data: created };
         } catch (err) {
             return { success: false, error: err.message };
         }
     }
 
-    async update(id: string | number, payload: any): Promise<{ success: boolean; error?: string; data?: T; }> {
+    async update(id: string | number, payload: any, force: boolean = false): Promise<{ success: boolean; error?: string; data?: T; }> {
         try {
             if (!id) throw new Error("ID é obrigatório para update");
+            if (!this.is_change(payload) && !force) {
+                return { success: true };
+            }
             this.loading = true;
             const { data } = await this.axios.put(`${this.endpoint}/${id}`, payload);
+            await this.load();
             this.loading = false;
-            const updated = data || {};
-            const idx = this.records.findIndex(r => r[this.primaryKey] === id);
-            if (idx >= 0) this.records[idx] = updated;
-            return { success: true, data: updated };
+            return { success: true };
         } catch (err) {
             return { success: false, error: err.message };
         }
@@ -198,14 +209,8 @@ export class RestDataSource<T = any> {
             if (!id) throw new Error("ID é obrigatório para delete");
             this.loading = true;
             await this.axios.delete(`${this.endpoint}/${id}`);
+            await this.load();
             this.loading = false;
-            const idx = this.records.findIndex(r => r[this.primaryKey] === id);
-            if (idx >= 0) {
-                this.records.splice(idx, 1);
-                if (this.index >= this.records.length) {
-                    this.index = this.records.length - 1;
-                }
-            }
             return { success: true };
         } catch (err) {
             return { success: false, error: err.message };
