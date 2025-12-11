@@ -198,7 +198,7 @@ class RestDataSource<T = any> {
             const { data } = await this.axios.put(`${this.endpoint}/${id}`, payload);
             await this.load();
             this.loading = false;
-            return { success: true };
+            return { success: true, data };
         } catch (err) {
             return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
