@@ -91,7 +91,7 @@ class RestDataSource<T = any> {
             // this.first();
             return { success: true, data: this.records };
         } catch (err) {
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     }
 
@@ -182,9 +182,9 @@ class RestDataSource<T = any> {
             const { data } = await this.axios.post(this.endpoint, payload);
             await this.load();
             this.loading = false;
-            return { success: true, data: created };
+            return { success: true, data };
         } catch (err) {
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     }
 
@@ -198,9 +198,9 @@ class RestDataSource<T = any> {
             const { data } = await this.axios.put(`${this.endpoint}/${id}`, payload);
             await this.load();
             this.loading = false;
-            return { success: true };
+            return { success: true, data };
         } catch (err) {
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     }
 
@@ -213,7 +213,7 @@ class RestDataSource<T = any> {
             this.loading = false;
             return { success: true };
         } catch (err) {
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     }
 }
